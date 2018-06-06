@@ -90,7 +90,7 @@ module.exports.getNewToken = function(req, res){
 
 
 
-                                let dataConverted = JSON.parse(data.toString('utf8'));
+                                let dataConverted = data.toString('utf8');
                                 console.log(dataConverted);
 
                                 if((dataConverted.IsSuccess === true  && dataConverted.Result !== null)){
