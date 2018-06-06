@@ -20,6 +20,7 @@ const server = restify.createServer({
 });
 
 
+
 const cors = corsMiddleware({
     allowHeaders: ['authorization']
 });
