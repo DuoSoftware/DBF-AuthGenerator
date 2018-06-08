@@ -22,7 +22,7 @@ const server = restify.createServer({
 
 
 const cors = corsMiddleware({
-    allowHeaders: ['authorization']
+    allowHeaders: ['authorization', 'federated_token']
 });
 
 server.pre(cors.preflight);
