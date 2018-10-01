@@ -31,7 +31,7 @@ module.exports.getNewToken = function(req, res){
     let url = `${config.Services.userServiceProtocol}://${config.Services.userServiceHost}/DVP/API/v1/Organisation/Id/1/${companyName}`;
 
     if (validator.isIP(config.Services.userServiceHost))
-        url = `${config.Services.userServiceProtocol}://${config.Services.userServiceHost}:${config.Services.userServicePort}` + `/DBF/API/${config.Services.botServiceVersion}/UserByEmail/${response.email}`;
+        url = `${config.Services.userServiceProtocol}://${config.Services.userServiceHost}:${config.Services.userServicePort}` + `/DBF/API/${config.Services.userServiceVersion}/UserByEmail/${response.email}`;
 
     let args = {
         headers: {
@@ -58,321 +58,330 @@ module.exports.getNewToken = function(req, res){
         };
 
         AuthMetaDataService.GetAuthMetaDataAll(data, function (response) {
+
+
             //console.log(JSON.parse(response).Result[0]);
+            if(JSON.parse(response).Result.length !== 0){
+                let AuthMetaData = JSON.parse(response).Result[0];
+                let jsonString;
 
-            let AuthMetaData = JSON.parse(response).Result[0];
-            let jsonString;
+                switch(AuthMetaData.authType) {
+                    case 'cognito':
+                        ValidateToken(token,AuthMetaData.config.cognito, function(response){
 
-            switch(AuthMetaData.authType) {
-                case 'cognito':
-                    ValidateToken(token,AuthMetaData.config.cognito, function(response){
+                            //console.log(response);
 
-                        //console.log(response);
+                            if(response){
+                                let url = `${config.Services.botServiceProtocol}://${config.Services.botServiceHost}/DBF/API/${config.Services.botServiceVersion}/UserByEmail/${response.email}`;
 
-                        if(response){
-                            let url = `${config.Services.botServiceProtocol}://${config.Services.botServiceHost}/DBF/API/${config.Services.botServiceVersion}/UserByEmail/${response.email}`;
+                                if (validator.isIP(config.Services.botServiceHost))
+                                    url = `${config.Services.botServiceProtocol}://${config.Services.botServiceHost}:${config.Services.botServicePort}` + `/DBF/API/${config.Services.botServiceVersion}/UserByEmail/${response.email}`;
 
-                            if (validator.isIP(config.Services.botServiceHost))
-                                url = `${config.Services.botServiceProtocol}://${config.Services.botServiceHost}:${config.Services.botServicePort}` + `/DBF/API/${config.Services.botServiceVersion}/UserByEmail/${response.email}`;
-
-                            let authtoken = config.Services.accessToken;
-                            let args = {
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "authorization": "Bearer " + authtoken,
-                                    "companyInfo": `${tenant}:${company}`
-                                }
-                            };
-
-
-
-                            client.get(url, args, (data, response) => {
+                                let authtoken = config.Services.accessToken;
+                                let args = {
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "authorization": "Bearer " + authtoken,
+                                        "companyInfo": `${tenant}:${company}`
+                                    }
+                                };
 
 
 
-                                let dataConverted = JSON.parse(data.toString('utf8'));
-                                console.log(dataConverted);
+                                client.get(url, args, (data, response) => {
 
-                                if((dataConverted.IsSuccess === true  && dataConverted.Result !== null)){
 
-                                    /*console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+                                    console.log(data.toString('utf8'));
+                                    let dataConverted = JSON.parse(data.toString('utf8'));
                                     console.log(dataConverted);
-                                    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');*/
 
-                                    let url = `${config.Services.userServiceProtocol}://${config.Services.userServiceHost}/auth/fedarate/login`;
+                                    if((dataConverted.IsSuccess === true  && dataConverted.Result !== null)){
 
-                                    if (validator.isIP(config.Services.userServiceHost))
-                                        url = `${config.Services.userServiceProtocol}://${config.Services.userServiceHost}:${config.Services.botServicePort}` + `/auth/fedarate/login`;
+                                        /*console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+                                        console.log(dataConverted);
+                                        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');*/
 
-                                    let authtoken = config.Services.accessToken;
-                                    let args = {
-                                        headers: {
-                                            "Content-Type": "application/json"
-                                        },
-                                        data :{
-                                            "userName": dataConverted.email,
-                                            "scope": scope,
-                                            "console": Console,
-                                            "tenant": tenant,
-                                            "companyId": company,
-                                            "companyName": companyName,
-                                            "clientID": clientID,
-                                            "userScopes": [
-                                                {
-                                                    "resource": "myNavigation",
-                                                    "actions": [
-                                                        "read"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "myUserProfile",
-                                                    "actions": [
-                                                        "read"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "wallet",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "sipuser",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "attribute",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "group",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "resourcetaskattribute",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "task",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "productivity",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "Shared",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "taskinfo",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "ardsresource",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "ardsrequest",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "requestmeta",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "queue",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "requestserver",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "user",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "userProfile",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "organisation",
-                                                    "actions": [
-                                                        "read",
-                                                        "write"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "resource",
-                                                    "actions": [
-                                                        "read"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "package",
-                                                    "actions": [
-                                                        "read"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "console",
-                                                    "actions": [
-                                                        "read"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "userScope",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "userAppScope",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "userMeta",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "userAppMeta",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "client",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                },
-                                                {
-                                                    "resource": "clientScope",
-                                                    "actions": [
-                                                        "read",
-                                                        "write",
-                                                        "delete"
-                                                    ]
-                                                }
-                                            ]
-                                        }
+                                        let url = `${config.Services.userServiceProtocol}://${config.Services.userServiceHost}/auth/fedarate/login`;
 
-                                    };
+                                        if (validator.isIP(config.Services.userServiceHost))
+                                            url = `${config.Services.userServiceProtocol}://${config.Services.userServiceHost}:${config.Services.botServicePort}` + `/auth/fedarate/login`;
+
+                                        let authtoken = config.Services.accessToken;
+                                        let args = {
+                                            headers: {
+                                                "Content-Type": "application/json"
+                                            },
+                                            data :{
+                                                "userName": dataConverted.email,
+                                                "scope": scope,
+                                                "console": Console,
+                                                "tenant": tenant,
+                                                "companyId": company,
+                                                "companyName": companyName,
+                                                "clientID": clientID,
+                                                "userScopes": [
+                                                    {
+                                                        "resource": "myNavigation",
+                                                        "actions": [
+                                                            "read"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "myUserProfile",
+                                                        "actions": [
+                                                            "read"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "wallet",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "sipuser",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "attribute",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "group",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "resourcetaskattribute",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "task",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "productivity",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "Shared",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "taskinfo",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "ardsresource",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "ardsrequest",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "requestmeta",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "queue",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "requestserver",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "user",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "userProfile",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "organisation",
+                                                        "actions": [
+                                                            "read",
+                                                            "write"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "resource",
+                                                        "actions": [
+                                                            "read"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "package",
+                                                        "actions": [
+                                                            "read"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "console",
+                                                        "actions": [
+                                                            "read"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "userScope",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "userAppScope",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "userMeta",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "userAppMeta",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "client",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "resource": "clientScope",
+                                                        "actions": [
+                                                            "read",
+                                                            "write",
+                                                            "delete"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+
+                                        };
 
 
-                                    client.post(url, args, (data, response) => {
+                                        client.post(url, args, (data, response) => {
 
-                                        jsonString=messageFormatter.FormatMessage(undefined, "Valid Session", true, data);
+                                            jsonString=messageFormatter.FormatMessage(undefined, "Valid Session", true, data);
+                                            res.end(jsonString)
+
+
+                                        });
+
+
+
+                                    }
+                                    else{
+                                        jsonString=messageFormatter.FormatMessage("Error", "User does not exist, please contact your Administrator", false, undefined);
                                         res.end(jsonString)
-
-
-                                    });
-
-
-
-                                }
-                                else{
-                                    jsonString=messageFormatter.FormatMessage("Error", "User does not exist, please contact your Administrator", false, undefined);
-                                    res.end(jsonString)
-                                }
+                                    }
 
 
 
 
-                            });
-                        }
-                        else{
-                            jsonString=messageFormatter.FormatMessage("Error", "Invalid Session", false, undefined);
-                            res.end(jsonString)
-                        }
+                                });
+                            }
+                            else{
+                                jsonString=messageFormatter.FormatMessage("Error", "Invalid Session", false, undefined);
+                                res.end(jsonString)
+                            }
 
 
 
 
-                    } );
-                    break;
+                        } );
+                        break;
 
-                default:
-                    jsonString=messageFormatter.FormatMessage(err, "getNewToken creation failed", false, undefined);
-                    res.end(jsonString)
+                    default:
+                        jsonString=messageFormatter.FormatMessage(err, "getNewToken failed", false, undefined);
+                        res.end(jsonString)
+                }
             }
+            else{
+                let jsonString;
+                jsonString=messageFormatter.FormatMessage(err, "getNewToken failed", false, undefined);
+                res.end(jsonString);
+            }
+
 
 
 

@@ -4,7 +4,7 @@ const messageFormatter = require('dvp-common-lite/CommonMessageGenerator/ClientM
 const logger = require('dvp-common-lite/LogHandler/CommonLogHandler.js').logger;
 const AuthMetaData = require('dbf-dbmodels/Models/DevPortalAuthCon').AuthMetaData;
 
-//Persist Menu
+//AuthMetaData
 module.exports.CreateAuthMetaData = function(req, res){
 
     logger.debug("DBF-Services.AuthMetaData Internal method ");
