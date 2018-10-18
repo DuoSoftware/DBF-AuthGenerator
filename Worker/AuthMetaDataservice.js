@@ -9,14 +9,16 @@ module.exports.CreateAuthMetaData = function(req, res){
 
     logger.debug("DBF-Services.AuthMetaData Internal method ");
 
-    let company = parseInt(req.user.company);
-    let tenant = parseInt(req.user.tenant);
+    /** company and tenant id's retrive from request payload */
+    
+    // let company = parseInt(req.user.company);
+    // let tenant = parseInt(req.user.tenant);
 
     let jsonString;
     let PersistMenu = AuthMetaData(req.body);
 
-    PersistMenu.company = company;
-    PersistMenu.tenant = tenant;
+    // PersistMenu.company = company;
+    // PersistMenu.tenant = tenant;
 
     AuthMetaData.save(function (err, _card) {
         if(err)
