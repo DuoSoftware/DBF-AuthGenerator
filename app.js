@@ -3,13 +3,13 @@ const config = require('config');
 const jwt = require('restify-jwt');
 const corsMiddleware = require('restify-cors-middleware');
 const TokenSwap = require('./Worker/TokenSwap');
+const AuthMetaData = require('./Worker/AuthMetaDataservice');
 const MongooseConnection = new require('dbf-dbmodels/MongoConnection');
 let connection  = new MongooseConnection();
 
 const port = config.Host.port || 3000;
 const version=config.Host.version;
 const hpath=config.Host.hostpath;
-
 
 const server = restify.createServer({
     name: "AuthGenerator",
@@ -18,8 +18,6 @@ const server = restify.createServer({
 {
 
 });
-
-
 
 const cors = corsMiddleware({
     allowHeaders: ['authorization', 'federated_token']
@@ -39,17 +37,12 @@ process.on('uncaughtException', function (err) {
     console.log("Node NOT Exiting...");
 });
 
+server.post('/DBF/API/:version/auth',TokenSwap.getNewToken);
+server.post('/DBF/API/:version/metadata', AuthMetaData.CreateAuthMetaData);
+
 server.listen(port, () => {
     console.log('%s listening at %s', server.name, server.url);
 });
 
 
-
-
-
-
-
-//Login
-
-server.post('/DBF/API/:version/auth',TokenSwap.getNewToken);
 
