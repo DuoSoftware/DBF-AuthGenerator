@@ -15,7 +15,8 @@ module.exports = {
         "port": "27017",
         "dbname": "dbfdb",
         "password": "DuoS123",
-        "user": "sfuser"
+        "user": "sfuser",
+        "cloudAtlas": true
     },
 
     "Services":{
