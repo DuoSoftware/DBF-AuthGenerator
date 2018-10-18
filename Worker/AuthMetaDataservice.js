@@ -15,12 +15,11 @@ module.exports.CreateAuthMetaData = function(req, res){
     // let tenant = parseInt(req.user.tenant);
 
     let jsonString;
-    let PersistMenu = AuthMetaData(req.body);
-
+    let authMetaData = AuthMetaData(req.body);
     // PersistMenu.company = company;
     // PersistMenu.tenant = tenant;
 
-    AuthMetaData.save(function (err, _card) {
+    authMetaData.save(function (err, _card) {
         if(err)
         {
             jsonString=messageFormatter.FormatMessage(err, "AuthMetaData creation failed", false, undefined);
